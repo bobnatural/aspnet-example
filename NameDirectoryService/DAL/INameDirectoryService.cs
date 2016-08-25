@@ -1,4 +1,5 @@
-﻿using NameDirectoryService.Models;
+﻿using Microsoft.Extensions.Logging;
+using NameDirectoryService.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace NameDirectoryService.DAL
 {
     interface INameDirectoryService
     {
-        List<NameDirectory> getAllRows();
+        List<NameDirectory> getAllRows(ILogger logger);
 
         void addNameDirectory(NameDirectory nd);
 

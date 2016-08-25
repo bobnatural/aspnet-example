@@ -15,6 +15,10 @@ namespace NameDirectoryService
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
+#if !DEBUG
+                // dirty hack for Docker only!
+                .UseUrls("http://0.0.0.0:5000") // Take that, Docker port forwarding!!!
+#endif                
                 .UseStartup<Startup>()
                 .Build();
 

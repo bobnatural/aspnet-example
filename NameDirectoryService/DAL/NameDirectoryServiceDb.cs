@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NameDirectoryService.Models;
+using Microsoft.Extensions.Logging;
 
 namespace NameDirectoryService.DAL
 {
@@ -36,9 +37,17 @@ namespace NameDirectoryService.DAL
             }
         }
 
-        public List<NameDirectory> getAllRows()
+        public List<NameDirectory> getAllRows(ILogger logger)
         {
-            return _context.NameDirectory.ToList();
+            try
+            {
+                return _context.NameDirectory.ToList();
+            }
+            catch(Exception ex)
+            {
+                logger.LogError("getAllRows error: " + ex.Message);
+                return null;
+            }
         }
     }
 }

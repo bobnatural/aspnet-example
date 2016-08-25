@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NameDirectoryService.Models;
 using Microsoft.EntityFrameworkCore;
 using NameDirectoryService.DAL;
+using Microsoft.Extensions.Options;
 
 namespace NameDirectoryService
 {
@@ -41,11 +42,19 @@ namespace NameDirectoryService
 
             services.AddMvc();
 
-            services.Configure<ConnectionSettings>(Configuration.GetSection("ConnectionStrings"));
+            Action<ConnectionSettings> conf = (c) => {
+                c.DriverClassName = Configuration["database_driverClassName"];
+                c.DefaultConnection = Configuration["database_url"];
+            };
+
+            if(Configuration["database_driverClassName"] != null && Configuration["database_url"] != null )
+                services.Configure<ConnectionSettings>(conf); // configure by environment variables
+            else
+                services.Configure<ConnectionSettings>(Configuration.GetSection("ConnectionStrings")); // configure by appsettings.json
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IOptions<ConnectionSettings> settings)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -72,6 +81,24 @@ namespace NameDirectoryService
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            ConfigureDatabase(env, loggerFactory, settings);
+        }
+
+        private void ConfigureDatabase(IHostingEnvironment env, ILoggerFactory loggerFactory, IOptions<ConnectionSettings> settings)
+        {
+            var logger = loggerFactory.CreateLogger("Logger");
+            try
+            {
+                //using (var db = new NameDirectoryDbContext(settings, env.WebRootPath, logger))
+                //{
+                //    db.Database.Migrate();
+                //}
+            }
+            catch (Exception ex)
+            {
+                logger.LogError("ConfigureDatabase error: " + ex.Message);
+            }
         }
     }
 }
